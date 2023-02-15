@@ -2,6 +2,7 @@ package com.project.myhome.controller;
 
 import com.project.myhome.model.Board;
 import com.project.myhome.repository.BoardRepository;
+import com.project.myhome.service.BoardService;
 import com.project.myhome.validator.BoardValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +27,9 @@ public class BoardController {
     private BoardRepository boardRepository;
     @Autowired
     private BoardValidator boardValidator;
+
+    @Autowired
+    private BoardService boardService;
 
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 2) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText){
@@ -51,12 +56,14 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String form(@Valid Board board, BindingResult bindingResult){
+    public String form(@Valid Board board, BindingResult bindingResult , Authentication authentication){
         boardValidator.validate(board, bindingResult);
         if (bindingResult.hasErrors()) {
             return "board/form";
         }
-        boardRepository.save(board);
+        String username = authentication.getName();
+        boardService.save(username, board);
+        //boardRepository.save(board);
         return "redirect:/board/list";
     }
 }

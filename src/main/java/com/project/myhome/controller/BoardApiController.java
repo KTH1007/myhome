@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-class BoardAPIController {
+class BoardApiController {
 
     @Autowired
     private BoardRepository repository;
