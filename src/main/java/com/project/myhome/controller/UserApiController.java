@@ -3,6 +3,7 @@ package com.project.myhome.controller;
 import com.project.myhome.model.Board;
 import com.project.myhome.model.User;
 import com.project.myhome.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.StringUtils;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@Slf4j
 class UserApiController {
 
     @Autowired
@@ -18,7 +20,11 @@ class UserApiController {
 
     @GetMapping("/users")
     List<User> all() {
-        return repository.findAll();
+        List<User> users = repository.findAll();
+        log.debug("getBoards().size() 호출전");
+        log.debug("getBoards().size() : {}", users.get(0).getBoards().size());
+        log.debug("getBoards().size() 호출후");
+        return users;
     }
     // end::get-aggregate-root[]
 
