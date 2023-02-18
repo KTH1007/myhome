@@ -1,12 +1,12 @@
 package com.project.myhome.controller;
 
+import com.project.myhome.mapper.UserMapper;
 import com.project.myhome.model.Board;
 import com.project.myhome.model.User;
 import com.project.myhome.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.util.StringUtils;
 
 import java.util.List;
 
@@ -18,22 +18,30 @@ class UserApiController {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @GetMapping("/users")
-    List<User> all() {
-        List<User> users = repository.findAll();
-        log.debug("getBoards().size() 호출전");
-        log.debug("getBoards().size() : {}", users.get(0).getBoards().size());
-        log.debug("getBoards().size() 호출후");
+    List<User> all(@RequestParam(required = false) String method, @RequestParam(required = false) String text) {
+        List<User> users = null;
+        if("query".equals(method)){
+            users = repository.findByUsernameQuery(text);
+        }
+        else if("nativeQuery".equals(method)){
+            users = repository.findByUsernameNativeQuery(text);
+        }
+        else if("mybatis".equals(method)){
+            users = userMapper.getUsers(text);
+        }
+        else users = repository.findAll();
         return users;
     }
-    // end::get-aggregate-root[]
 
     @PostMapping("/users")
     User newUser(@RequestBody User newUser) {
         return repository.save(newUser);
     }
 
-    // Single item
 
     @GetMapping("/users/{id}")
     User one(@PathVariable Long id) {
