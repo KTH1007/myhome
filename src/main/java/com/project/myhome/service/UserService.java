@@ -24,4 +24,8 @@ public class UserService {
         user.getRoles().add(role);
         return userRepository.save(user);
     }
+
+    public boolean checkUserName(String username){
+        return userRepository.existsByUsername(username);
+    }
 }

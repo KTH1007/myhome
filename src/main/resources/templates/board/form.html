@@ -1,5 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:insert="~{fragments/common :: head('게시판')}">
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -54,9 +55,10 @@
             </div>
         </div>
         <div class="text-right">
-            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>
+<!--            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>-->
+            <button type="submit" class="btn btn-primary">확인</button>
             <a class="btn btn-primary" th:href="@{/board/list}">취소</a>
-            <button type="submit" class="btn btn-primary" sec:authorize="hasRole('ROLE_ADMIN')" th:onclick="|deleteBoard(*{id})|">삭제</button>
+            <button type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
         </div>
     </form>
     </div>
@@ -67,24 +69,19 @@
 <script>
     function deleteBoard(id) {
         //DELETE /api/boards/{id}
-
-        if (confirm("정말 삭제하시겠습니까??") == true){    //확인
-
-            $.ajax({
-                url: '/api/boards/' + id,
-                type: 'DELETE',
-                success: function(result) {
-                    // Do something with the result
-                    console.log('result', result);
-                }
-            });
-
-        }else{   //취소
-
-            return false;
-
+        if(!confirm("게시글을 삭제하시겠습니까?")){
+            return;
         }
-
+        $.ajax({
+            type: 'DELETE',
+            url: '/api/boards/' + id,
+            success: function(result) {
+                console.log('result', result);
+                alert('삭제됐습니다.');
+                //삭제 성공시 요청될 url
+                location.href = '/board/list';
+            }
+        });
     }
 </script>
 
