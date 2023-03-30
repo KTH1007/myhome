@@ -53,12 +53,17 @@
             <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">
                 내용은 1글자 이상 15000글자 이하로 작성해야 합니다.
             </div>
+<!--            <p th:text="${#authentication.authorities.contains('ROLE_ADMIN')}"></p>-->
+<!--            <p th:text="${#authentication.authorities}"></p>-->
+<!--            <p th:text="${#authentication}"></p>-->
+<!--            <p sec:authorize="hasAuthority('ROLE_ADMIN')">관리자 권한이 있습니다.</p>-->
         </div>
         <div class="text-right">
 <!--            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>-->
             <button type="submit" class="btn btn-primary">확인</button>
             <a class="btn btn-primary" th:href="@{/board/list}">취소</a>
-            <button type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
+            <button th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
+             #authentication.name == board.user.username))}" type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
         </div>
     </form>
     </div>
