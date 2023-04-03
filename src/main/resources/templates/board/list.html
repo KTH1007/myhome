@@ -49,15 +49,18 @@
             <th scope="col">번호</th>
             <th scope="col">제목</th>
             <th scope="col">작성자</th>
+            <th scope="col" style="margin: 2px">작성일</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="board : ${boards}">
+        <tr th:each="board : ${boards}" th:onclick="'location.href=\'/board/form?id=' + ${board.id} + '\';'" style="cursor:pointer;">
             <td th:text="${board.id}">Mark</td>
-            <td><a th:text="${board.title}" th:href="@{/board/form(id=${board.id})}">Otto</a></td>
+            <td th:text="${board.title}">Otto</td>
             <td th:text="${board.user.username}">홍길동</td>
+            <td th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd')}">작성일</td>
         </tr>
         </tbody>
+
     </table>
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
