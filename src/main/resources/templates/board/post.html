@@ -50,7 +50,8 @@
                       rows="10" th:field="*{content}" readonly></textarea>
         </div>
         <div class="text-right">
-            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>
+<!--            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>-->
+            <a class="btn btn-primary" onclick="history.back()">목록으로</a>
             <a class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')')
              or (board.user != null and #authentication.name == board.user.username))}"
                th:href="@{/board/form(id=*{id}, title=*{title}, content=*{content})}">수정</a>
