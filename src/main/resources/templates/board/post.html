@@ -34,39 +34,35 @@
 
 <div class="container">
     <h2>게시판</h2>
-    <form action="#" th:action="@{/board/form}" th:object="${board}" method="post">
+
+    <form th:object="${board}">
         <input type="hidden" th:field="*{id}">
         <div class="form-group">
             <label for="title">제목</label>
             <input type="text" class="form-control"
                    th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" id="title"
-                   th:field="*{title}" placeholder="제목을 입력하세요.">
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
-                제목은 2글자 이상 50글자 이하로 작성해야 합니다.
-            </div>
+                   th:field="*{title}" readonly>
         </div>
         <div class="form-group">
             <label for="content">내용</label>
             <textarea class="form-control" id="content"
                       th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
-                      rows="10" th:field="*{content}"></textarea>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">
-                내용은 1글자 이상 15000글자 이하로 작성해야 합니다.
-            </div>
-<!--            <p th:text="${#authentication.authorities.contains('ROLE_ADMIN')}"></p>-->
-<!--            <p th:text="${#authentication.authorities}"></p>-->
-<!--            <p th:text="${#authentication}"></p>-->
-<!--            <p sec:authorize="hasAuthority('ROLE_ADMIN')">관리자 권한이 있습니다.</p>-->
+                      rows="10" th:field="*{content}" readonly></textarea>
         </div>
         <div class="text-right">
-<!--            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>-->
-            <button type="submit" class="btn btn-primary">확인</button>
-            <a class="btn btn-primary" th:href="@{/board/list}">취소</a>
+            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>
+            <a class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')')
+             or (board.user != null and #authentication.name == board.user.username))}"
+               th:href="@{/board/form(id=*{id}, title=*{title}, content=*{content})}">수정</a>
             <button th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
              #authentication.name == board.user.username))}" type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
         </div>
     </form>
-    </div>
+</div>
+<div style="float: right; padding-right: 50px; padding-top: 50px " >
+    <p>작성일: <span th:text="${#temporals.format(board.createdAt, 'yyyy:MM:dd')}"></span></p>
+    <p>작성시간: <span th:text="${#temporals.format(board.createdAt, 'HH:mm:ss')}"></span></p>
+</div>
 
 </div>
 

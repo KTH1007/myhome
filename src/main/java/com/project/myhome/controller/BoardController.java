@@ -45,6 +45,13 @@ public class BoardController {
         return "board/list";
     }
 
+
+    @GetMapping("/post")
+    public String post(Model model, @RequestParam(required = false) Long id){
+        Board board = boardRepository.findById(id).orElse(null);
+        model.addAttribute("board", board);
+        return "board/post";
+    }
     @GetMapping("/form")
     public String form(Model model, @RequestParam(required = false) Long id){
         if(id == null){

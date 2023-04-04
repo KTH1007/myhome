@@ -53,7 +53,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="board, i : ${boards}" th:onclick="'location.href=\'/board/form?id=' + ${board.id} + '\';'" style="cursor:pointer;">
+        <tr th:each="board, i : ${boards}" th:onclick="'location.href=\'/board/post?id=' + ${board.id} + '\';'" style="cursor:pointer;">
 <!--            <td th:text="${board.id}">Mark</td>-->
             <td th:text="${boards.getNumber() * boards.getSize() + i.index+1}"></td>
             <td th:text="${board.title}">Otto</td>
