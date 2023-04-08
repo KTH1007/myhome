@@ -49,6 +49,12 @@
                       th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
                       rows="10" th:field="*{content}" readonly></textarea>
         </div>
+        <ul>
+            <li th:each="file : ${files}">
+                <span th:text="${file.filename}"></span>
+                <a th:href="@{/api/file/download/{id}(id=${file.id})}">다운로드</a>
+            </li>
+        </ul>
         <div class="text-right">
 <!--            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>-->
             <a class="btn btn-primary" onclick="history.back()">목록으로</a>

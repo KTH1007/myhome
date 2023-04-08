@@ -1,6 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
 <head th:insert="~{fragments/common :: head('게시판')}">
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -15,7 +15,8 @@
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:insert="~{fragments/common :: menu('board')}">
     <a class="navbar-brand" href="#">Spring Boot Tutorial</a>
-    <button aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+    <button aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation"
+            class="navbar-toggler"
             data-target="#navbarsExampleDefault" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -34,53 +35,59 @@
 
 <div class="container">
     <h2>게시판</h2>
-    <form action="#" th:action="@{/board/form}" th:object="${board}" method="post">
-        <input type="hidden" th:field="*{id}">
+    <form action="#" method="post" th:action="@{/board/form}" th:object="${board}" enctype="multipart/form-data">
+        <input th:field="*{id}" type="hidden">
         <div class="form-group">
             <label for="title">제목</label>
-            <input type="text" class="form-control"
-                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" id="title"
-                   th:field="*{title}" placeholder="제목을 입력하세요.">
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+            <input class="form-control" id="title"
+                   placeholder="제목을 입력하세요." th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                   th:field="*{title}" type="text">
+            <div class="invalid-feedback" th:errors="*{title}" th:if="${#fields.hasErrors('title')}">
                 제목은 2글자 이상 50글자 이하로 작성해야 합니다.
             </div>
         </div>
         <div class="form-group">
             <label for="content">내용</label>
             <textarea class="form-control" id="content"
-                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
-                      rows="10" th:field="*{content}"></textarea>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">
+                      rows="10"
+                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'" th:field="*{content}"></textarea>
+            <div class="invalid-feedback" th:errors="*{content}" th:if="${#fields.hasErrors('content')}">
                 내용은 1글자 이상 15000글자 이하로 작성해야 합니다.
             </div>
-<!--            <p th:text="${#authentication.authorities.contains('ROLE_ADMIN')}"></p>-->
-<!--            <p th:text="${#authentication.authorities}"></p>-->
-<!--            <p th:text="${#authentication}"></p>-->
-<!--            <p sec:authorize="hasAuthority('ROLE_ADMIN')">관리자 권한이 있습니다.</p>-->
+            <!--            <p th:text="${#authentication.authorities.contains('ROLE_ADMIN')}"></p>-->
+            <!--            <p th:text="${#authentication.authorities}"></p>-->
+            <!--            <p th:text="${#authentication}"></p>-->
+            <!--            <p sec:authorize="hasAuthority('ROLE_ADMIN')">관리자 권한이 있습니다.</p>-->
+
+            <div class="form-group">
+                <label for="file">파일</label>
+                <input class="form-control-file" id="file" name="file" type="file" multiple>
+            </div>
         </div>
         <div class="text-right">
-<!--            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>-->
-            <button type="submit" class="btn btn-primary">확인</button>
+            <!--            <button type="submit" class="btn btn-primary" th:if="${#authentication.name == board.user.username}">확인</button>-->
+            <button class="btn btn-primary" type="submit">확인</button>
             <a class="btn btn-primary" th:href="@{/board/list}">취소</a>
-            <button th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
-             #authentication.name == board.user.username))}" type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
+            <button class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
+             #authentication.name == board.user.username))}" th:onclick="|deleteBoard(*{id})|"
+                    type="button">삭제
+            </button>
         </div>
     </form>
-    </div>
-
 </div>
+
 
 <footer th:insert="~{fragments/common :: footer}"></footer>
 <script>
     function deleteBoard(id) {
         //DELETE /api/boards/{id}
-        if(!confirm("게시글을 삭제하시겠습니까?")){
+        if (!confirm("게시글을 삭제하시겠습니까?")) {
             return;
         }
         $.ajax({
             type: 'DELETE',
             url: '/api/boards/' + id,
-            success: function(result) {
+            success: function (result) {
                 console.log('result', result);
                 alert('삭제됐습니다.');
                 //삭제 성공시 요청될 url

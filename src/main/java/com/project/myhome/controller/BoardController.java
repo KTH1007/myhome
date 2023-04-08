@@ -1,24 +1,40 @@
 package com.project.myhome.controller;
 
 import com.project.myhome.model.Board;
+import com.project.myhome.model.FileData;
 import com.project.myhome.repository.BoardRepository;
 import com.project.myhome.service.BoardService;
+import com.project.myhome.service.FileService;
 import com.project.myhome.validator.BoardValidator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/board")
@@ -31,6 +47,8 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
+    @Autowired
+    private FileService fileService;
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 2) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText){
         //Page<Board> boards =  boardRepository.findAll(pageable);
@@ -49,7 +67,9 @@ public class BoardController {
     @GetMapping("/post")
     public String post(Model model, @RequestParam(required = false) Long id){
         Board board = boardRepository.findById(id).orElse(null);
+        List<FileData> files = fileService.findByBoardId(id);
         model.addAttribute("board", board);
+        model.addAttribute("files", files);
         return "board/post";
     }
     @GetMapping("/form")
@@ -65,14 +85,35 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String form(@Valid Board board, BindingResult bindingResult , Authentication authentication){
+    public String form(@Valid Board board, BindingResult bindingResult , Authentication authentication,
+                       @RequestParam("file") MultipartFile[] files) throws IOException {
         boardValidator.validate(board, bindingResult);
         if (bindingResult.hasErrors()) {
             return "board/form";
         }
         String username = authentication.getName();
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                String filename = file.getOriginalFilename();
+                int filesize = (int) file.getSize();
+                String filetype = file.getContentType();
+                UUID uuid = UUID.randomUUID();
+                String randomFileName = uuid + "_" + filename;
+                Path path = Paths.get("src/main/resources/static/files/" + randomFileName);
+
+                FileData newFile = new FileData();
+                newFile.setFilename(filename);
+                newFile.setFilesize(filesize);
+                newFile.setFiletype(filetype);
+                newFile.setFilepath("/files/" + randomFileName);
+                newFile.setUploadDate(LocalDateTime.now());
+
+                Files.copy(file.getInputStream(), path);
+
+                board.addFile(newFile);
+            }
+        }
         boardService.save(username, board);
-        //boardRepository.save(board);
         return "redirect:/board/list";
     }
 }

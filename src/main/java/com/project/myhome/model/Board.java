@@ -6,7 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -26,5 +29,12 @@ public class Board {
     @JoinColumn(name ="user_id")
     @JsonIgnore
     private User user;
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileData> files = new ArrayList<>();
+    public void addFile(FileData file) {
+        files.add(file);
+        file.setBoard(this);
+    }
 
 }
