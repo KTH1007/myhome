@@ -12,9 +12,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -93,8 +95,26 @@ class BoardApiController {
 
     @PreAuthorize("hasRole('ADMIN') or #board.user.username == authentication.name")
     @DeleteMapping("/boards/{id}")
+    @Transactional
     void deleteBoard(@PathVariable Long id) {
+        Board board = boardRepository.findById(id).orElseThrow();
+        List<FileData> files = board.getFiles();
+        if(files != null && !files.isEmpty()){
+            for(FileData file : files){
+                //파일 경로
+                Path filePath = Paths.get("src/main/resources/static",file.getFilepath());
+                //파일 삭제
+                try{
+                    Files.delete(filePath);
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        //게시글 삭제
         boardRepository.deleteById(id);
+
     }
 
 }
