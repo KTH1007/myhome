@@ -60,7 +60,7 @@
             <a class="btn btn-primary" onclick="history.back()">목록으로</a>
             <a class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')')
              or (board.user != null and #authentication.name == board.user.username))}"
-               th:href="@{/board/form(id=*{id}, title=*{title}, content=*{content})}">수정</a>
+               th:href="@{/board/form(id=*{id})}">수정</a>
             <button th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
              #authentication.name == board.user.username))}" type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
         </div>

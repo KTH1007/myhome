@@ -3,9 +3,9 @@ package com.project.myhome.controller;
 import com.project.myhome.model.Board;
 import com.project.myhome.model.FileData;
 import com.project.myhome.repository.BoardRepository;
+import com.project.myhome.repository.FileRepository;
 import com.project.myhome.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +34,9 @@ class BoardApiController {
     private BoardRepository boardRepository;
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private FileRepository fileRepository;
 
 
     @GetMapping("/boards")
@@ -88,6 +91,14 @@ class BoardApiController {
                 .contentType(MediaType.parseMediaType(file.getFiletype()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFilename)
                 .body(resource);
+    }
+
+    @DeleteMapping("/files/delete/{fileId}")
+    void deleteFile(@PathVariable Long fileId){
+        FileData fileData = fileRepository.findById(fileId).orElseThrow();
+        Path filePath = Paths.get("src/main/resources/static",fileData.getFilepath());
+        //실제 파일 삭제
+        fileService.deleteById(fileId);
     }
 
 

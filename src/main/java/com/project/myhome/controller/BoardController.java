@@ -3,6 +3,7 @@ package com.project.myhome.controller;
 import com.project.myhome.model.Board;
 import com.project.myhome.model.FileData;
 import com.project.myhome.repository.BoardRepository;
+import com.project.myhome.repository.FileRepository;
 import com.project.myhome.service.BoardService;
 import com.project.myhome.service.FileService;
 import com.project.myhome.validator.BoardValidator;
@@ -49,6 +50,9 @@ public class BoardController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private FileRepository fileRepository;
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 2) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText){
         //Page<Board> boards =  boardRepository.findAll(pageable);
@@ -80,6 +84,9 @@ public class BoardController {
         else {
             Board board = boardRepository.findById(id).orElse(null);
             model.addAttribute("board", board);
+            // 파일 목록 추가
+            List<FileData> files = fileRepository.findByBoardId(id);
+            model.addAttribute("files", files);
         }
         return "board/form";
     }
@@ -111,6 +118,13 @@ public class BoardController {
                 Files.copy(file.getInputStream(), path);
 
                 board.addFile(newFile);
+            }
+        }
+        // 기존 파일 정보 유지
+        if (board.getId() != 0) {
+            List<FileData> oldFiles = fileRepository.findByBoardId(board.getId());
+            for (FileData oldFile : oldFiles) {
+                board.addFile(oldFile);
             }
         }
         boardService.save(username, board);

@@ -30,7 +30,7 @@ public class Board {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<FileData> files = new ArrayList<>();
     public void addFile(FileData file) {
         files.add(file);

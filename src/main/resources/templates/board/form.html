@@ -60,7 +60,14 @@
             <!--            <p sec:authorize="hasAuthority('ROLE_ADMIN')">관리자 권한이 있습니다.</p>-->
 
             <div class="form-group">
+                <br>
                 <label for="file">파일</label>
+                <ul>
+                    <li th:each="file : ${files}">
+                        <span th:text="${file.filename}"></span>
+                        <button th:onclick="|deleteFile(${file.id})|">삭제</button>
+                    </li>
+                </ul>
                 <input class="form-control-file" id="file" name="file" type="file" multiple>
             </div>
         </div>
@@ -95,6 +102,19 @@
             }
         });
     }
+
+    function deleteFile(fileId) {
+        console.log("Deleting file with ID: " + fileId);
+        $.ajax({
+            url: '/api/files/delete/' + fileId,
+            type: 'DELETE',
+            success: function(result) {
+                // 파일 삭제 성공 시 처리
+                location.reload();
+            }
+        });
+    }
+
 </script>
 
 </body>
