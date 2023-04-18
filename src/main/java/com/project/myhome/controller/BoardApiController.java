@@ -4,6 +4,7 @@ import com.project.myhome.model.Board;
 import com.project.myhome.model.FileData;
 import com.project.myhome.repository.BoardRepository;
 import com.project.myhome.repository.FileRepository;
+import com.project.myhome.service.BoardService;
 import com.project.myhome.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -38,6 +39,9 @@ class BoardApiController {
     @Autowired
     private FileRepository fileRepository;
 
+    @Autowired
+    private BoardService boardService;
+
 
     @GetMapping("/boards")
     List<Board> all(@RequestParam(required = false, defaultValue = "") String title,
@@ -45,7 +49,7 @@ class BoardApiController {
         if (StringUtils.isEmpty(title) && StringUtils.isEmpty(content)) {
             return boardRepository.findAll();
         } else {
-            return boardRepository.findByTitleOrContent(title, content);
+            return boardService.findByTitleOrContent(title, content);
         }
     }
     // end::get-aggregate-root[]

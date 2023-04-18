@@ -56,7 +56,7 @@ public class BoardController {
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 15) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText){
         //Page<Board> boards =  boardRepository.findAll(pageable);
-        Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText,searchText,pageable);
+        Page<Board> boards = boardService.searchBoards(searchText,searchText,pageable);
         int block = 5;
         int currentBlock = (boards.getPageable().getPageNumber() / block) * block;
         int startPage = currentBlock + 1;
@@ -85,7 +85,7 @@ public class BoardController {
             Board board = boardRepository.findById(id).orElse(null);
             model.addAttribute("board", board);
             // 파일 목록 추가
-            List<FileData> files = fileRepository.findByBoardId(id);
+            List<FileData> files = fileService.findByBoardId(id);
             model.addAttribute("files", files);
         }
         return "board/form";
@@ -122,7 +122,7 @@ public class BoardController {
         }
         // 기존 파일 정보 유지
         if (board.getId() != 0) {
-            List<FileData> oldFiles = fileRepository.findByBoardId(board.getId());
+            List<FileData> oldFiles = fileService.findByBoardId(board.getId());
             for (FileData oldFile : oldFiles) {
                 board.addFile(oldFile);
             }
