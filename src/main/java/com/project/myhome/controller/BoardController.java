@@ -7,6 +7,7 @@ import com.project.myhome.repository.FileRepository;
 import com.project.myhome.service.BoardService;
 import com.project.myhome.service.FileService;
 import com.project.myhome.validator.BoardValidator;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.checkerframework.checker.units.qual.A;
@@ -54,9 +55,23 @@ public class BoardController {
     @Autowired
     private FileRepository fileRepository;
     @GetMapping("/list")
-    public String list(Model model, @PageableDefault(size = 15) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText){
-        //Page<Board> boards =  boardRepository.findAll(pageable);
-        Page<Board> boards = boardService.searchBoards(searchText,searchText,pageable);
+    public String list(Model model, @PageableDefault(size = 15) Pageable pageable,
+                       @RequestParam(required = false, defaultValue = "") String searchText,
+                       @RequestParam(required = false) String orderBy,
+                       HttpSession session) {
+        if (orderBy == null) {
+            orderBy = (String) session.getAttribute("orderBy");
+            if (orderBy == null) {
+                orderBy = "desc";
+            }
+        }
+        session.setAttribute("orderBy", orderBy);
+        Page<Board> boards;
+        if (orderBy.equals("asc")) {
+            boards = boardService.searchBoardsOrderByCreatedAtAsc(searchText, searchText, pageable);
+        } else {
+            boards = boardService.searchBoardsOrderByCreatedAtDesc(searchText, searchText, pageable);
+        }
         int block = 5;
         int currentBlock = (boards.getPageable().getPageNumber() / block) * block;
         int startPage = currentBlock + 1;
@@ -64,6 +79,7 @@ public class BoardController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("boards", boards);
+        model.addAttribute("orderBy", orderBy);
         return "board/list";
     }
 

@@ -33,5 +33,13 @@ public class BoardService {
     public List<Board> findByTitleOrContent(String title, String content) {
         return boardRepository.findByTitleOrContent(title, content);
     }
+
+    public Page<Board> searchBoardsOrderByCreatedAtAsc(String title, String content, Pageable pageable){
+        return boardRepository.findByTitleContainingOrContentContainingOrderByCreatedAtAsc(title,content,pageable);
+    }
+
+    public Page<Board> searchBoardsOrderByCreatedAtDesc(String title, String content, Pageable pageable){
+        return boardRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(title,content,pageable);
+    }
 }
 
