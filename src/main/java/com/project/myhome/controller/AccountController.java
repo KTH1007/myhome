@@ -2,7 +2,6 @@ package com.project.myhome.controller;
 
 import com.project.myhome.model.User;
 import com.project.myhome.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/account")
 public class AccountController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public AccountController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/login")
     public String login(){

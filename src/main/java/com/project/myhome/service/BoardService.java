@@ -4,7 +4,6 @@ import com.project.myhome.model.Board;
 import com.project.myhome.model.User;
 import com.project.myhome.repository.BoardRepository;
 import com.project.myhome.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,15 @@ import java.util.List;
 
 @Service
 public class BoardService {
-    @Autowired
-    private BoardRepository boardRepository;
+    private final BoardRepository boardRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public BoardService(BoardRepository boardRepository, UserRepository userRepository) {
+        this.boardRepository = boardRepository;
+        this.userRepository = userRepository;
+    }
+
     public Board save(String username, Board board){
         User user = userRepository.findByUsername(username);
         board.setCreatedAt(LocalDateTime.now());
@@ -44,6 +47,12 @@ public class BoardService {
 
     public Board findById(Long id) {
         return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid board id: " + id));
+    }
+
+    //메소드 수준에서 권한 체크를 하기 위한 코드
+    public boolean isBoardAuthor(Long id, String username) {
+        Board board = boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + id));
+        return board.getUser().getUsername().equals(username);
     }
 }
 

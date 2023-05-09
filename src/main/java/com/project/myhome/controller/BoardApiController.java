@@ -6,7 +6,6 @@ import com.project.myhome.repository.BoardRepository;
 import com.project.myhome.repository.FileRepository;
 import com.project.myhome.service.BoardService;
 import com.project.myhome.service.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -31,16 +29,19 @@ import java.util.List;
 @RequestMapping("/api")
 class BoardApiController {
 
-    @Autowired
-    private BoardRepository boardRepository;
-    @Autowired
-    private FileService fileService;
+    private final BoardRepository boardRepository;
+    private final FileService fileService;
 
-    @Autowired
-    private FileRepository fileRepository;
+    private final FileRepository fileRepository;
 
-    @Autowired
-    private BoardService boardService;
+    private final BoardService boardService;
+
+    public BoardApiController(BoardRepository boardRepository, FileService fileService, FileRepository fileRepository, BoardService boardService) {
+        this.boardRepository = boardRepository;
+        this.fileService = fileService;
+        this.fileRepository = fileRepository;
+        this.boardService = boardService;
+    }
 
 
     @GetMapping("/boards")
@@ -108,7 +109,7 @@ class BoardApiController {
 
     //@Secured("ROLE_ADMIN")
 
-    @PreAuthorize("hasRole('ADMIN') or #board.user.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or @boardService.isBoardAuthor(#id, authentication.name)")
     @DeleteMapping("/boards/{id}")
     @Transactional
     void deleteBoard(@PathVariable Long id) {

@@ -38,22 +38,25 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/board")
 public class BoardController {
-    @Autowired
-    private BoardRepository boardRepository;
-    @Autowired
-    private BoardValidator boardValidator;
+    private final BoardRepository boardRepository;
+    private final BoardValidator boardValidator;
 
-    @Autowired
-    private BoardService boardService;
+    private final BoardService boardService;
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public BoardController(BoardRepository boardRepository, BoardValidator boardValidator, BoardService boardService, FileService fileService, CommentService commentService, UserService userService) {
+        this.boardRepository = boardRepository;
+        this.boardValidator = boardValidator;
+        this.boardService = boardService;
+        this.fileService = fileService;
+        this.commentService = commentService;
+        this.userService = userService;
+    }
 
 
     @GetMapping("/list")

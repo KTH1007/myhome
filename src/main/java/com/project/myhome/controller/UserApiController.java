@@ -6,7 +6,6 @@ import com.project.myhome.model.User;
 import com.project.myhome.repository.UserRepository;
 import com.project.myhome.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,14 +15,17 @@ import java.util.List;
 @Slf4j
 class UserApiController {
 
-    @Autowired
-    private UserRepository userRepositoryrepository;
+    private final UserRepository userRepositoryrepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
+    public UserApiController(UserRepository userRepositoryrepository, UserService userService, UserMapper userMapper) {
+        this.userRepositoryrepository = userRepositoryrepository;
+        this.userService = userService;
+        this.userMapper = userMapper;
+    }
 
     @GetMapping("/users")
     List<User> all(@RequestParam(required = false) String method, @RequestParam(required = false) String text) {
