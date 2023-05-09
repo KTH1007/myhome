@@ -41,5 +41,9 @@ public class BoardService {
     public Page<Board> searchBoardsOrderByCreatedAtDesc(String title, String content, Pageable pageable){
         return boardRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(title,content,pageable);
     }
+
+    public Board findById(Long id) {
+        return boardRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid board id: " + id));
+    }
 }
 

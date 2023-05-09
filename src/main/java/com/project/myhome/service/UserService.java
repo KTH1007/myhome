@@ -38,4 +38,9 @@ public class UserService {
     public List<User> findByUsernameNativeQuery(String username) {
         return userRepository.findByUsernameNativeQuery(username);
     }
+
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username);
+    }
+
 }

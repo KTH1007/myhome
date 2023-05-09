@@ -1,6 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+>
 <head th:insert="~{fragments/common :: head('게시판')}">
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -71,9 +71,50 @@
     <p>작성시간: <span th:text="${#temporals.format(board.createdAt, 'HH:mm:ss')}"></span></p>
 </div>
 
+<!-- 댓글 작성 폼 -->
+<div class="container">
+    <div class="card-body">
+        <form id="comment-form" class="form-group">
+            <label for="comment-content" hidden>댓글 작성</label>
+            <input type="text" id="comment-content" class="form-control" placeholder="댓글을 입력해주세요.">
+            <button type="submit" class="btn btn-primary mt-2">작성</button>
+        </form>
+    </div>
 </div>
 
+<!-- 댓글 목록 -->
+<div class="container">
+    <ul id="comment-list" th:each="comment : ${comments}" class="list-unstyled">
+        <li class="mb-3">
+            <h5><span th:text="${comment.userName}"></span></h5>
+            <span class="comment-content" th:text="${comment.content}"></span>
+            <p><span class="comment-created-at"
+                            th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+            <span th:if="${comment.userName == #authentication.name}">
+                <button class="edit-button btn btn-primary mt-2" th:data-id="${comment.id}">수정</button>
+            </span>
+            <span th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or comment.userName == #authentication.name}">
+                <button class="delete-button btn btn-primary mt-2" th:data-id="${comment.id}">삭제</button>
+            </span>
+            <form class="edit-form" style="display: none;">
+                <input class="edit-content form-control" type="text" value="${comment.content}">
+                <button class="btn btn-primary mt-2" type="submit">확인</button>
+                <button class="btn btn-secondary mt-2 cancel-button" type="button">취소</button>
+            </form>
+
+        </li>
+    </ul>
+</div>
+
+
 <footer th:insert="~{fragments/common :: footer}"></footer>
+
+<script th:inline="javascript">
+    let boardId = [[${board.id}]];
+    let userId = [[${userId}]];
+    console.log("boardId: " + boardId);
+    console.log("userId: " + userId);
+</script>
 <script>
     function deleteBoard(id) {
         //DELETE /api/boards/{id}
@@ -91,6 +132,87 @@
             }
         });
     }
+    // 댓글 작성
+    $('#comment-form').submit(function (event) {
+        event.preventDefault();
+        let content = $('#comment-content').val();
+        $.ajax({
+            type: 'POST',
+            url: '/api/comments',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                content: content,
+                boardId: boardId,
+                userId: userId,
+            }),
+            success: function () {
+                // 페이지 새로고침
+                location.reload();
+            }
+        });
+    });
+    //댓글 수정
+    $(document).on('click', '.edit-button', function() {
+        let commentId = $(this).data('id');
+        let commentLi = $(this).closest('li');
+        let commentContent = commentLi.find('.comment-content');
+        let editForm = commentLi.find('.edit-form');
+        let editContent = editForm.find('.edit-content');
+        let editButton = commentLi.find('.edit-button');
+
+        commentContent.hide();
+        editForm.show();
+        editButton.hide();
+        editContent.val(commentContent.text());
+    });
+
+    $(document).on('click', '.cancel-button', function() {
+        let commentLi = $(this).closest('li');
+        let commentContent = commentLi.find('.comment-content');
+        let editForm = commentLi.find('.edit-form');
+        let button = commentLi.find('.edit-button')
+
+        editForm.hide();
+        button.show();
+        commentContent.show();
+    });
+
+    $(document).on('submit', '.edit-form', function(e) {
+        e.preventDefault();
+        let commentLi = $(this).closest('li');
+        let commentId = commentLi.find('.edit-button').data('id');
+        let commentContent = commentLi.find('.comment-content');
+        let editForm = $(this);
+        let editContent = editForm.find('.edit-content');
+        let editButton = commentLi.find('.edit-button')
+        $.ajax({
+            url: '/api/comments/' + commentId,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                content: editContent.val()
+            }),
+            success: function() {
+                commentContent.text(editContent.val());
+                commentLi.find('.comment-created-at').text(new Date().toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'})); // 수정 시간 업데이트
+                editForm.hide();
+                editButton.show();
+                commentContent.show();
+            }
+        });
+    });
+    // 댓글 삭제
+    $(document).on('click', '.delete-button', function () {
+        let id = $(this).data('id');
+        $.ajax({
+            type: 'DELETE',
+            url: '/api/comments/' + id,
+            success: function () {
+                // 댓글 삭제
+                $('button[data-id="' + id + '"]').closest('li').remove();
+            }
+        });
+    });
 </script>
 
 </body>

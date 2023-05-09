@@ -1,39 +1,36 @@
 package com.project.myhome.controller;
 
 import com.project.myhome.model.Board;
+import com.project.myhome.model.Comment;
 import com.project.myhome.model.FileData;
+import com.project.myhome.model.User;
 import com.project.myhome.repository.BoardRepository;
-import com.project.myhome.repository.FileRepository;
 import com.project.myhome.service.BoardService;
+import com.project.myhome.service.CommentService;
 import com.project.myhome.service.FileService;
+import com.project.myhome.service.UserService;
 import com.project.myhome.validator.BoardValidator;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -53,7 +50,12 @@ public class BoardController {
     private FileService fileService;
 
     @Autowired
-    private FileRepository fileRepository;
+    private CommentService commentService;
+
+    @Autowired
+    private UserService userService;
+
+
     @GetMapping("/list")
     public String list(Model model, @PageableDefault(size = 15) Pageable pageable,
                        @RequestParam(required = false, defaultValue = "") String searchText,
@@ -85,11 +87,15 @@ public class BoardController {
 
 
     @GetMapping("/post")
-    public String post(Model model, @RequestParam(required = false) Long id){
+    public String post(Model model, @RequestParam(required = false) Long id, Principal principal){
         Board board = boardRepository.findById(id).orElse(null);
         List<FileData> files = fileService.findByBoardId(id);
+        List<Comment> comments = commentService.findByBoardId(id);
+        User user = userService.findByUsername(principal.getName());
         model.addAttribute("board", board);
         model.addAttribute("files", files);
+        model.addAttribute("comments", comments);
+        model.addAttribute("userId", user.getId());
         return "board/post";
     }
     @GetMapping("/form")
