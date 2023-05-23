@@ -2,6 +2,8 @@ package com.project.myhome.service;
 
 import com.project.myhome.model.Comment;
 import com.project.myhome.repository.CommentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,5 +52,13 @@ public class CommentService {
     public boolean isCommentAuthor(Long id, String username) {
         Comment comment = commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + id));
         return comment.getUserName().equals(username);
+    }
+
+    public Page<Comment> getCommentsByBoardIdWithPagingDesc(Long boardId, Pageable pageable) {
+        return commentRepository.findAllByBoardIdOrderByCreatedAtDesc(boardId, pageable);
+    }
+
+    public Page<Comment> getCommentsByBoardIdWithPagingAsc(Long boardId, Pageable pageable) {
+        return commentRepository.findAllByBoardIdOrderByCreatedAtAsc(boardId, pageable);
     }
 }

@@ -12,7 +12,6 @@ import com.project.myhome.service.UserService;
 import com.project.myhome.validator.BoardValidator;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -90,15 +89,39 @@ public class BoardController {
 
 
     @GetMapping("/post")
-    public String post(Model model, @RequestParam(required = false) Long id, Principal principal){
+    public String post(Model model, @RequestParam(required = false) Long id, Principal principal,
+                       @PageableDefault(size = 5) Pageable pageable, @RequestParam(required = false) String commentOrderBy,
+                       HttpSession session){
+        if (commentOrderBy == null) {
+            commentOrderBy = (String) session.getAttribute("commentOrderBy");
+            if (commentOrderBy == null) {
+                commentOrderBy = "desc";
+            }
+        }
+        session.setAttribute("commentOrderBy", commentOrderBy);
         Board board = boardRepository.findById(id).orElse(null);
         List<FileData> files = fileService.findByBoardId(id);
-        List<Comment> comments = commentService.findByBoardId(id);
         User user = userService.findByUsername(principal.getName());
         model.addAttribute("board", board);
         model.addAttribute("files", files);
-        model.addAttribute("comments", comments);
         model.addAttribute("userId", user.getId());
+
+        Page<Comment> comments;
+        if (commentOrderBy.equals("asc")) {
+            comments = commentService.getCommentsByBoardIdWithPagingAsc(id, pageable);
+        } else {
+            comments = commentService.getCommentsByBoardIdWithPagingDesc(id, pageable);
+        }
+        model.addAttribute("comments", comments);
+
+        int block = 5;
+        int currentBlock = (comments.getPageable().getPageNumber() / block) * block;
+        int startPage = currentBlock + 1;
+        int endPage = Math.min(comments.getTotalPages(), currentBlock + block);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentOrderBy", commentOrderBy);
         return "board/post";
     }
     @GetMapping("/form")
