@@ -2,6 +2,11 @@ package com.project.myhome.controller;
 
 import com.project.myhome.model.User;
 import com.project.myhome.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,17 +26,20 @@ public class AccountController {
         this.userService = userService;
     }
 
+    //로그인 페이지
     @GetMapping("/login")
     public String login(){
         return "account/login";
     }
 
+    //회원가입 페이지
     @GetMapping("/register")
     public String register(){
         return "account/register";
     }
 
 
+    //회원가입
     @PostMapping("/register")
     public String register(@RequestParam String username, @RequestParam String password1, @RequestParam String password2, Model model){
         if (userService.checkUserName(username)) {
@@ -62,6 +70,40 @@ public class AccountController {
         user.setPassword(password1);
         userService.save(user);
         return "redirect:/";
+
+
     }
+
+   //회원탈퇴 페이지
+    @GetMapping("/delete")
+    public String deleteForm() {
+        return "account/delete";
+    }
+
+    //회원탈퇴
+    @PostMapping("/delete")
+    public String delete(@RequestParam String password, HttpSession session, Model model) {
+        // 현재 로그인한 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        // 사용자의 암호화된 비밀번호 가져오기
+        String encodedPassword = userService.getUserEncodedPassword(username);
+
+        // 입력한 비밀번호와 암호화된 비밀번호 비교
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        boolean isMatch = passwordEncoder.matches(password, encodedPassword);
+        User user = userService.findByUsername(username);
+        if (isMatch) {
+            userService.deleteUser(user);
+            session.invalidate();
+            return "redirect:/";
+        } else {
+            model.addAttribute("passwordError", "비밀번호가 일치하지 않습니다.");
+            return "/account/delete";
+        }
+    }
+
+
 
 }

@@ -48,7 +48,9 @@
                 <!--                    <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->
                 <span class="text-white" sec:authentication="name">사용자</span>
                 <span class="text-white mx-2" sec:authentication="principal.authorities" >권한</span>
-                <button class="btn btn-secondary my-2 my-sm-0" type="submit">로그아웃</button>
+                <button class="btn btn-secondary my-2 my-sm-0 mr-2" type="submit">로그아웃</button>
+                <a class="btn btn-secondary my-2 my-sm-0 mr-2"  th:href="@{/account/delete}"
+                   sec:authorize="isAuthenticated()">회원탈퇴</a>
             </form>
         </div>
     </nav>
