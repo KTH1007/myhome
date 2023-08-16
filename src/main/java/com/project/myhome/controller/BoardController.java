@@ -1,5 +1,8 @@
 package com.project.myhome.controller;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.project.myhome.model.Board;
 import com.project.myhome.model.Comment;
 import com.project.myhome.model.FileData;
@@ -26,9 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,21 +49,21 @@ public class BoardController {
 
     private final UserService userService;
 
-    public BoardController(BoardRepository boardRepository, BoardValidator boardValidator, BoardService boardService, FileService fileService, CommentService commentService, UserService userService) {
+    private final AmazonS3 amazonS3Client;
+
+    public BoardController(BoardRepository boardRepository, BoardValidator boardValidator, BoardService boardService, FileService fileService, CommentService commentService, UserService userService, AmazonS3 amazonS3Client) {
         this.boardRepository = boardRepository;
         this.boardValidator = boardValidator;
         this.boardService = boardService;
         this.fileService = fileService;
         this.commentService = commentService;
         this.userService = userService;
+        this.amazonS3Client = amazonS3Client;
     }
 
 
     @GetMapping("/list")
-    public String list(Model model, @PageableDefault(size = 15) Pageable pageable,
-                       @RequestParam(required = false, defaultValue = "") String searchText,
-                       @RequestParam(required = false) String orderBy,
-                       HttpSession session) {
+    public String list(Model model, @PageableDefault(size = 15) Pageable pageable, @RequestParam(required = false, defaultValue = "") String searchText, @RequestParam(required = false) String orderBy, HttpSession session) {
         if (orderBy == null) {
             orderBy = (String) session.getAttribute("orderBy");
             if (orderBy == null) {
@@ -89,9 +90,7 @@ public class BoardController {
 
 
     @GetMapping("/post")
-    public String post(Model model, @RequestParam(required = false) Long id, Principal principal,
-                       @PageableDefault(size = 5) Pageable pageable, @RequestParam(required = false) String commentOrderBy,
-                       HttpSession session){
+    public String post(Model model, @RequestParam(required = false) Long id, Principal principal, @PageableDefault(size = 5) Pageable pageable, @RequestParam(required = false) String commentOrderBy, HttpSession session) {
         if (commentOrderBy == null) {
             commentOrderBy = (String) session.getAttribute("commentOrderBy");
             if (commentOrderBy == null) {
@@ -124,12 +123,12 @@ public class BoardController {
         model.addAttribute("commentOrderBy", commentOrderBy);
         return "board/post";
     }
+
     @GetMapping("/form")
-    public String form(Model model, @RequestParam(required = false) Long id){
-        if(id == null){
+    public String form(Model model, @RequestParam(required = false) Long id) {
+        if (id == null) {
             model.addAttribute("board", new Board());
-        }
-        else {
+        } else {
             Board board = boardRepository.findById(id).orElse(null);
             model.addAttribute("board", board);
             // 파일 목록 추가
@@ -140,8 +139,7 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String form(@Valid Board board, BindingResult bindingResult , Authentication authentication,
-                       @RequestParam("file") MultipartFile[] files) throws IOException {
+    public String form(@Valid Board board, BindingResult bindingResult, Authentication authentication, @RequestParam("file") MultipartFile[] files) throws IOException {
         boardValidator.validate(board, bindingResult);
         if (bindingResult.hasErrors()) {
             return "board/form";
@@ -154,16 +152,22 @@ public class BoardController {
                 String filetype = file.getContentType();
                 UUID uuid = UUID.randomUUID();
                 String randomFileName = uuid + "_" + filename;
-                Path path = Paths.get("src/main/resources/static/files/" + randomFileName);
+
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(filetype);
+                metadata.setContentLength(filesize);
+
+                InputStream inputStream = file.getInputStream();
+
+                PutObjectRequest putObjectRequest = new PutObjectRequest("myhomewebbucket", "files/" + randomFileName, inputStream, metadata);
+                amazonS3Client.putObject(putObjectRequest);
 
                 FileData newFile = new FileData();
                 newFile.setFilename(filename);
                 newFile.setFilesize(filesize);
                 newFile.setFiletype(filetype);
-                newFile.setFilepath("/files/" + randomFileName);
+                newFile.setFilepath("files/" + randomFileName);
                 newFile.setUploadDate(LocalDateTime.now());
-
-                Files.copy(file.getInputStream(), path);
 
                 board.addFile(newFile);
             }

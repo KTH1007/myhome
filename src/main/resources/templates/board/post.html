@@ -1,5 +1,5 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+<html xmlns:th="http://www.thymeleaf.org"
 >
 <head th:insert="~{fragments/common :: head('게시판')}">
     <!-- Required meta tags -->
@@ -15,7 +15,8 @@
 <body>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" th:insert="~{fragments/common :: menu('board')}">
     <a class="navbar-brand" href="#">Spring Boot Tutorial</a>
-    <button aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+    <button aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation"
+            class="navbar-toggler"
             data-target="#navbarsExampleDefault" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -36,37 +37,40 @@
     <h2>게시판</h2>
 
     <form th:object="${board}">
-        <input type="hidden" th:field="*{id}">
+        <input th:field="*{id}" type="hidden">
         <div class="form-group">
             <label for="title">제목</label>
-            <input type="text" class="form-control"
-                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" id="title"
-                   th:field="*{title}" readonly>
+            <input class="form-control" id="title"
+                   readonly th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                   th:field="*{title}" type="text">
         </div>
         <div class="form-group">
             <label for="content">내용</label>
             <textarea class="form-control" id="content"
-                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
-                      rows="10" th:field="*{content}" readonly></textarea>
+                      readonly
+                      rows="10" th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
+                      th:field="*{content}"></textarea>
         </div>
         <ul>
             <li th:each="file : ${files}">
                 <span th:text="${file.filename}"></span>
-                <a class="btn btn-primary" role="button" th:href="@{/api/file/download/{id}(id=${file.id})}">다운로드</a>
+                <a class="btn btn-primary" role="button" th:href="@{/api/files/{id}(id=${file.id})}">다운로드</a>
             </li>
         </ul>
         <div class="text-right">
-<!--            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>-->
+            <!--            <a class="btn btn-primary" th:href="@{/board/list}">목록으로</a>-->
             <a class="btn btn-primary" onclick="history.back()">목록으로</a>
-            <a class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')')
-             or (board.user != null and #authentication.name == board.user.username))}"
-               th:href="@{/board/form(id=*{id})}">수정</a>
-            <button th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
-             #authentication.name == board.user.username))}" type="button" class="btn btn-primary" th:onclick="|deleteBoard(*{id})|">삭제</button>
+            <a class="btn btn-primary" th:href="@{/board/form(id=*{id})}"
+               th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')')
+             or (board.user != null and #authentication.name == board.user.username))}">수정</a>
+            <button class="btn btn-primary" th:if="${board.title != null and (#authorization.expression('hasAuthority(''ROLE_ADMIN'')') or (board.user != null and
+             #authentication.name == board.user.username))}" th:onclick="|deleteBoard(*{id})|"
+                    type="button">삭제
+            </button>
         </div>
     </form>
 </div>
-<div style="float: right; padding-right: 50px; padding-top: 50px " >
+<div style="float: right; padding-right: 50px; padding-top: 50px ">
     <p>작성일: <span th:text="${#temporals.format(board.createdAt, 'yyyy:MM:dd')}"></span></p>
     <p>작성시간: <span th:text="${#temporals.format(board.createdAt, 'HH:mm:ss')}"></span></p>
 </div>
@@ -74,22 +78,22 @@
 <!-- 댓글 작성 폼 -->
 <div class="container">
     <div class="card-body">
-        <form id="comment-form" class="form-group">
+        <form class="form-group" id="comment-form">
             <label for="comment-content" hidden>댓글 작성</label>
-            <input type="text" id="comment-content" class="form-control" placeholder="댓글을 입력해주세요.">
-            <button type="submit" class="btn btn-primary mt-2">작성</button>
+            <input class="form-control" id="comment-content" placeholder="댓글을 입력해주세요." type="text">
+            <button class="btn btn-primary mt-2" type="submit">작성</button>
         </form>
     </div>
 </div>
 
 <!-- 댓글 목록 -->
 <div class="container">
-    <ul id="comment-list" th:each="comment : ${comments}" class="list-unstyled">
+    <ul class="list-unstyled" id="comment-list" th:each="comment : ${comments}">
         <li class="mb-3">
             <h5><span th:text="${comment.userName}"></span></h5>
             <span class="comment-content" th:text="${comment.content}"></span>
             <p><span class="comment-created-at"
-                            th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+                     th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
             <span th:if="${comment.userName == #authentication.name}">
                 <button class="edit-button btn btn-primary mt-2" th:data-id="${comment.id}">수정</button>
             </span>
@@ -117,10 +121,11 @@
             <li class="page-item" th:classappend="${i == comments.pageable.pageNumber + 1 && i != 0} ? 'disabled'"
                 th:each="i : ${#numbers.sequence(startPage, endPage)}">
                 <a class="page-link" href="#" th:href="@{/board/post(id=${board.id},page=${i - 1})}"
-                   th:text="${i}" th:if="${i != 0}"></a>
+                   th:if="${i != 0}" th:text="${i}"></a>
             </li>
 
-            <li class="page-item" th:classappend="${comments.totalPages == comments.pageable.pageNumber + 1 || comments.totalPages == 0} ? 'disabled'">
+            <li class="page-item"
+                th:classappend="${comments.totalPages == comments.pageable.pageNumber + 1 || comments.totalPages == 0} ? 'disabled'">
                 <a class="page-link" th:href="@{/board/post(id=${board.id},page=${comments.pageable.pageNumber + 1})}">Next</a>
             </li>
             <li class="page-item">
@@ -130,11 +135,11 @@
     </nav>
 
     <div>
-        <label for="commentOrderBy" class="sr-only">정렬 방식</label>
-        <select id="commentOrderBy" class="custom-select" style="width: 120px"
+        <label class="sr-only" for="commentOrderBy">정렬 방식</label>
+        <select class="custom-select" id="commentOrderBy" style="width: 120px"
                 th:onchange="|location.href='?id=' + ${board.id} + '&commentOrderBy=' + this.value;|">
-            <option value="desc" th:selected="${commentOrderBy == 'desc'}">최신순</option>
-            <option value="asc" th:selected="${commentOrderBy == 'asc'}">오래된순</option>
+            <option th:selected="${commentOrderBy == 'desc'}" value="desc">최신순</option>
+            <option th:selected="${commentOrderBy == 'asc'}" value="asc">오래된순</option>
         </select>
     </div>
 
@@ -153,13 +158,13 @@
 <script>
     function deleteBoard(id) {
         //DELETE /api/boards/{id}
-        if(!confirm("게시글을 삭제하시겠습니까?")){
+        if (!confirm("게시글을 삭제하시겠습니까?")) {
             return;
         }
         $.ajax({
             type: 'DELETE',
             url: '/api/boards/' + id,
-            success: function(result) {
+            success: function (result) {
                 console.log('result', result);
                 alert('삭제됐습니다.');
                 //삭제 성공시 요청될 url
@@ -167,6 +172,7 @@
             }
         });
     }
+
     // 댓글 작성
     $('#comment-form').submit(function (event) {
         event.preventDefault();
@@ -187,7 +193,7 @@
         });
     });
     //댓글 수정
-    $(document).on('click', '.edit-button', function() {
+    $(document).on('click', '.edit-button', function () {
         let commentId = $(this).data('id');
         let commentLi = $(this).closest('li');
         let commentContent = commentLi.find('.comment-content');
@@ -201,7 +207,7 @@
         editContent.val(commentContent.text());
     });
 
-    $(document).on('click', '.cancel-button', function() {
+    $(document).on('click', '.cancel-button', function () {
         let commentLi = $(this).closest('li');
         let commentContent = commentLi.find('.comment-content');
         let editForm = commentLi.find('.edit-form');
@@ -212,7 +218,7 @@
         commentContent.show();
     });
 
-    $(document).on('submit', '.edit-form', function(e) {
+    $(document).on('submit', '.edit-form', function (e) {
         e.preventDefault();
         let commentLi = $(this).closest('li');
         let commentId = commentLi.find('.edit-button').data('id');
@@ -227,7 +233,7 @@
             data: JSON.stringify({
                 content: editContent.val()
             }),
-            success: function() {
+            success: function () {
                 commentContent.text(editContent.val());
                 commentLi.find('.comment-created-at').text(new Date().toLocaleString('ko-KR', {timeZone: 'Asia/Seoul'})); // 수정 시간 업데이트
                 editForm.hide();
