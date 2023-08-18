@@ -61,4 +61,8 @@ public class CommentService {
     public Page<Comment> getCommentsByBoardIdWithPagingAsc(Long boardId, Pageable pageable) {
         return commentRepository.findAllByBoardIdOrderByCreatedAtAsc(boardId, pageable);
     }
+
+    public void deleteByUserId(Long id) {
+        commentRepository.deleteByUserId(id);
+    }
 }

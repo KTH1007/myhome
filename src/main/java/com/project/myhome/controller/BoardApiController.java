@@ -68,6 +68,8 @@ class BoardApiController {
         return boardRepository.findById(id).orElse(null);
     }
 
+    //게시글 수정
+    @PreAuthorize("@boardService.isBoardAuthor(#id, authentication.name)")
     @PutMapping("/boards/{id}")
     Board replaceBoard(@RequestBody Board newBoard, @PathVariable Long id) {
 
@@ -110,7 +112,6 @@ class BoardApiController {
     }
 
     //파일 삭제
-
     @DeleteMapping("/files/delete/{fileId}")
     public void deleteFile(@PathVariable Long fileId) {
         FileData fileData = fileRepository.findById(fileId).orElseThrow();
@@ -123,8 +124,8 @@ class BoardApiController {
         fileService.deleteById(fileId);
     }
 
-    //@Secured("ROLE_ADMIN")
 
+    //게시글 삭제
     @PreAuthorize("hasRole('ADMIN') or @boardService.isBoardAuthor(#id, authentication.name)")
     @DeleteMapping("/boards/{id}")
     @Transactional
@@ -134,6 +135,7 @@ class BoardApiController {
         if (files != null && !files.isEmpty()) {
             for (FileData file : files) {
                 amazonS3Client.deleteObject("myhomewebbucket", file.getFilepath());
+                System.out.println(file.getFilepath());
             }
         }
         //게시글 삭제

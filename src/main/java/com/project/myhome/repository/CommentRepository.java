@@ -11,6 +11,10 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByBoardId(Long boardId);
+
     Page<Comment> findAllByBoardIdOrderByCreatedAtDesc(Long boardId, Pageable pageable);
+
     Page<Comment> findAllByBoardIdOrderByCreatedAtAsc(Long boardId, Pageable pageable);
+
+    void deleteByUserId(Long id);
 }
