@@ -4,30 +4,49 @@ https://ddoongboard.duckdns.org
 
 ## ✅ IDE 세팅
 Spring Boot
+</br>
 IntelliJ
 
 ## ✅ 개발환경
 -Spring Boot
+</br>
 -Spring Security
+</br>
 -Thymeleaf
+</br>
 -Spring Data JPA
+</br>
 -Java 17
+</br>
 -MariaDB
+</br>
 -Bootstrap
+</br>
 -AWS
 
 ## ✅ 구현 기능
 * 게시판
+  </br>
   -게시글 CRUD
+  </br>
   -제목과 내용으로 게시글 조회
+  </br>
   -페이징
+  </br>
   -비동기 댓글
+  </br>
   -게시글 정렬
+  </br>
   -파일 업로드, 다운로드
+  </br>
 * 계정 관련
+  </br>
   -로그인
+  </br>
   -회원탈퇴
+  </br>
   -관리자 권한
+  </br>
 
 ## ✅ 이미지
 * 메인페이지
