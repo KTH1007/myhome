@@ -35,7 +35,7 @@
 
 <div class="container">
     <h2>게시판</h2>
-    <form action="#" method="post" th:action="@{/board/form}" th:object="${board}" enctype="multipart/form-data">
+    <form action="#" enctype="multipart/form-data" method="post" th:action="@{/board/form}" th:object="${board}">
         <input th:field="*{id}" type="hidden">
         <div class="form-group">
             <label for="title">제목</label>
@@ -68,7 +68,7 @@
                         <button th:onclick="|deleteFile(${file.id})|">삭제</button>
                     </li>
                 </ul>
-                <input class="form-control-file" id="file" name="file" type="file" multiple>
+                <input class="form-control-file" id="file" multiple name="file" type="file">
             </div>
         </div>
         <div class="text-right">
@@ -108,7 +108,7 @@
         $.ajax({
             url: '/api/files/delete/' + fileId,
             type: 'DELETE',
-            success: function(result) {
+            success: function (result) {
                 // 파일 삭제 성공 시 처리
                 location.reload();
             }

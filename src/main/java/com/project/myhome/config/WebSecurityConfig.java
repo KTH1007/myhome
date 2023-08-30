@@ -27,7 +27,7 @@ public class WebSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/account/register" , "/css/**", "/api/**").permitAll()
+                        .requestMatchers("/", "/account/register", "/css/**", "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -38,6 +38,7 @@ public class WebSecurityConfig {
 
         return http.build();
     }
+
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth)
             throws Exception {
@@ -52,6 +53,7 @@ public class WebSecurityConfig {
                         + "inner join role r on ur.role_id = r.id "
                         + "where u.username = ?");
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

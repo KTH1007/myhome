@@ -31,8 +31,7 @@ public class CommentService {
     //댓글 수정
 
     public Comment updateComment(Long id, Comment comment) {
-        Comment existingComment = commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid comment id: " + id));
+        Comment existingComment = commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid comment id: " + id));
         existingComment.setContent(comment.getContent());
         existingComment.setCreatedAt(LocalDateTime.now());
         return commentRepository.save(existingComment);
